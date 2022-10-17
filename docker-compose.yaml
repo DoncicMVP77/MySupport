@@ -1,0 +1,70 @@
+version: '3'
+services:
+  redis:
+    container_name: redis_container
+    image: redis
+  db:
+    container_name: 'my_postgres'
+    image: postgres:latest
+    volumes:
+      - ./docker/postgresql/data:/var/lib/postgresql/data
+    restart:
+      always
+    networks:
+      - project
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_DB=mysupport
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=bnm321654
+  project:
+    build: ./project
+    ports:
+      - 8000:8000
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+    restart: always
+
+    networks:
+      - project
+    env_file:
+      - ./project/.env
+
+  celery:
+    restart: always
+    build: ./project
+    command: celery -A project.celery worker -l info
+    depends_on:
+      - redis
+    links:
+      - redis:redis
+    env_file:
+      - ./project/.env
+
+
+  celerybeat:
+    restart: always
+    build: ./project
+    depends_on:
+      - redis
+    env_file:
+      - ./project/.env
+    links:
+      - redis:redis
+    command: celery -A project.celery beat -l info
+
+
+volumes:
+  postgres_data:
+
+networks:
+  project:
+     driver: bridge
