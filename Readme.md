@@ -1,7 +1,7 @@
 # SupportService django rest framework
-Support service api with django-rest-framework
+Support service api with django-rest-framework.
 
-#Want to use this project?
+Want to use this project?
 1. Update the environment variables in the docker-compose.yml and .env files
 2. Build the images and run the containers:
 
