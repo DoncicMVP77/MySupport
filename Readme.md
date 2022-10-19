@@ -1,4 +1,4 @@
-# SupportService django rest framework
+# SupportServiceAPI django rest framework
 Support service api with django-rest-framework.
 
 Want to use this project?
